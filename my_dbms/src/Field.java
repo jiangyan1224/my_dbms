@@ -1,10 +1,10 @@
 
-//描述元组
+//描述列
 public class Field {
     //name type size primaryKey isnull
-    private String name;
-    private String type;
-    private boolean primaryKey;
+    private String name;//列名
+    private String type;//数据类型
+    private boolean primaryKey;//是否作为主键
 
     public String getName() {
         return name;

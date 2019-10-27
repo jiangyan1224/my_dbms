@@ -1,0 +1,12 @@
+登入数据库的时候，就已经要有登录人的用户名，而且要有当前的默认连接到的数据库，所以userName和dbName要静态
+构造函数私有化，防止table类在外部被实例化，进一步的作用？？？
+Table的createTable方法：{
+为什么要是静态方法？ 因为一开始可能是没有Table对象的，而且构造函数private,在这种情况下要想执行createTable方法建表，只能通过静态方法
+static void init(String userName,String dbName)可能也是因为这个原因static
+如何调用该函数？
+https://blog.csdn.net/cys1991/article/details/7593790创建真实目录
+为什么要同时有fieldMap和dictFile？可能是要用在索引里？
+FileWriter&PrintWriter：字符流和过滤流什么意思？为什么不直接用FileWriter写入文件，println方法有什么好处吗？
+https://www.oschina.net/question/101123_17855
+--------------------------------------------------------------2019.10.27
+}
