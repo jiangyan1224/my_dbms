@@ -25,5 +25,6 @@ PrintWriter的write方法是重写Writer的write方法
 静态方法不能被重写
 重载/overload：同一个类中同名但是不同参数的方法（可以是个数/类型/顺序不同），参数列表必须不同，跟返回值/访问权限/抛出异常没有关系
 https://blog.csdn.net/dawn_after_dark/article/details/74357049没看完
+checkType中的data使用时是怎么输入的，[null]是哪来的？fillStr吗？这里的data是经过fillData处理过的吗？
 --------------------------------------------------------------2019.10.28
 }

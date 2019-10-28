@@ -103,6 +103,19 @@ public class Table {
     }
 
     /**
+     * 删除某字段field
+     * @param fieldName 字段名
+     */
+    public String deleteDict(String fieldName){
+        if (!fieldMap.containsKey(fieldName)) return "错误：不存在字段："+fieldName;
+
+        fieldMap.remove(fieldName);//从table对象中删除field
+
+        writeDict(fieldMap,false);//向dictFile中写入remove后的fieldMap，false清空原有内容再写入
+        return "success";
+    }
+
+    /**
      * 提供一组fields字段映射集，写入字典文件
      *
      * @param fields 字段映射集
@@ -126,6 +139,16 @@ public class Table {
                     pw.println(name+" "+type+" "+"^");
                 }
             }//end of for
+            /**
+             * 1.对于流的关闭顺序，一种是按照后创建流先关闭的原则
+             * 另一种直接关闭包装流即可，例如：
+             *BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("a.txt")));
+             *这里处理你的业务逻辑
+             *reader.close();//在这里关闭就把所有流都给关掉了，不需要再额外去关闭了
+             * pw.close();
+             *
+             * 2.try后面的()是1.7的新特性，括号里的内容支持包括流以及任何可关闭的资源，数据流会在 try 执行完毕后自动被关闭
+             */
         } catch (IOException e){//FileWriter，包含了FileNotFoundException
             e.printStackTrace();
         }
@@ -175,13 +198,118 @@ public class Table {
             }
         }//end of 写入data
 
-        //写入索引文件
-        if (table.indexFile.exists()) table.readInex();
+        //写入索引文件到table对象
+        if (table.indexFile.exists()) table.readIndex();
         return table;
 
     }
 
     public Map<String,Field> getFieldMap() {return fieldMap;}
+
+    /**
+     * 从索引文件读取索引对象
+     */
+    private void readIndex(){
+        if (!indexFile.exists()) return;
+        try (
+                //从文件中读出一个对象到内存，可以用ObjectInputStream套接FileInputStream来实现（序列化）
+                FileInputStream fis=new FileInputStream(indexFile);
+                ObjectInputStream ois=new ObjectInputStream(fis);
+                ){
+            indexMap=(Map<String, IndexTree>) ois.readObject();
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 删除表
+     */
+    public static String dropTable(String name){
+        if (!existTable(name)) return "错误：不存在表："+name;
+        File folder =new File("dir"+"/"+userName+"/"+dbName+"/"+name);
+        deleteFolder(folder);
+        return "success";
+    }
+    /**
+     * 删除文件/文件夹
+     */
+    //静态方法是不能直接调用非静态成员的
+    private static void deleteFolder(File file){
+        if (file.isFile()) file.delete();//删除文件
+        else if (file.isDirectory()){//文件夹,则要删除目录下所有文件和当前文件夹
+            File[] files=file.listFiles();//返回所有文件
+            for (int i=1;i<=files.length;i++){
+                deleteFolder(files[i]);//删除文件
+            }
+            file.delete();//删除文件夹
+        }
+    }
+
+    /**
+     * 对空位填充 fillStr 填充后的字段按数据字段顺序排序(不为主键的data，值可以为空)
+     * @param fillStr 要填充的字符串
+     * @param data 原始数据
+     * @return  填充后的数据
+     */
+    private Map<String,String> fillData(Map<String,String>data,String fillStr){
+        /**
+         * 输入的data应该是Map形式，
+         * id 123
+         * sex 0
+         * height 1.8
+         * 这样
+         */
+        //fillData是真正写入文件的集合，空位补fillStr
+        Map<String,String> fillData=new LinkedHashMap<>();
+        //遍历数据字典
+        for (Map.Entry<String,Field> fieldEntry: fieldMap.entrySet()){
+            String fieldKey=fieldEntry.getKey();//返回每个field的name，比如id
+            if (data.get(fieldKey)==null){//data中id对应的输入值是null
+                data.put(fieldKey,fillStr);
+            }else {//对应输入值不为null，原样写到fillData
+                fillData.put(fieldKey,data.get(fieldKey));
+            }
+        }
+        return fillData;
+    }
+
+    /**
+     *利用正则表达式判断data类型是否与数据字典相符
+     * @param data
+     * @return
+     */
+    private boolean checkType(Map<String,String> data){
+        if (data.size()!=fieldMap.size()) return false;
+
+        //遍历data.value和field.type，逐个对比类型
+        Iterator<Field> fieldIter=fieldMap.values().iterator();
+        while (fieldIter.hasNext()){
+            Field field =fieldIter.next();//返回field 如 id int *
+            String dataValue=data.get(field.getName());// data: id 123
+
+            //如果是[NULL]则跳过类型检查
+            if ("[NULL]".equals(dataValue)) continue;
+            switch (field.getType()){
+                case "int":
+                    if (!dataValue.matches("^(-|\\+)?\\d+$"))
+                        return false;
+                    break;
+                case "double":
+                    if (!dataValue.matches("^(-|\\+)?\\d*\\.?\\d+$"))
+                        return false;
+                    break;
+                case "varchar":
+                    break;
+                default:
+                    return false;
+            }
+        }
+        return true;
+    }
+
 
 
 }
