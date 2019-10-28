@@ -7,6 +7,23 @@ static void init(String userName,String dbName)可能也是因为这个原因sta
 https://blog.csdn.net/cys1991/article/details/7593790创建真实目录
 为什么要同时有fieldMap和dictFile？可能是要用在索引里？
 FileWriter&PrintWriter：字符流和过滤流什么意思？为什么不直接用FileWriter写入文件，println方法有什么好处吗？
-https://www.oschina.net/question/101123_17855
+https://www.oschina.net/question/101123_17855（PrintWriter 的write()方法和println()方法）
 --------------------------------------------------------------2019.10.27
+10.28
+FileWriter是字符输出流，PrintWriter：字符打印流
+PrintWriter中的write方法(继承自父类Writer)和print方法等同，但是它的println方法在print方法基础上调用了newline方法，newline调用了flush方法刷新流
+根据https://blog.csdn.net/evilcry2012/article/details/78455742
+FileWriter作为字符输出的结点流类，继承自OutputStreamWriter，本身没有重写任何父类的方法，基本等价于父类，
+至于它们存在的意义只是为了方便理解，一看就知道是用来写入字符文件的类！！！
+FileWriter 很明显是针对文件的封装;PrintWriter 则更普遍一点
+PrintWriter pw=new PrintWriter(new FileWriter())作用是：FileWriter用于写文件，字符输出节点流类；在此基础上用PrintWriter封装，就可以调用print系方法
+如println
+FileWriter的write方法继承自OutputStreamWriter,（OutputStreamWriter继承自Writer）OutputStreamWriter的write方法来自StreamEncoder的implWrite
+PrintWriter的write方法是重写Writer的write方法
+
+覆盖/重写/override 父子类中的同名方法，函数名/参数列表/返回类型/抛出异常必须完全相同，被重写的权限要大于重写的权限，所以被重写的不能是private
+静态方法不能被重写
+重载/overload：同一个类中同名但是不同参数的方法（可以是个数/类型/顺序不同），参数列表必须不同，跟返回值/访问权限/抛出异常没有关系
+https://blog.csdn.net/dawn_after_dark/article/details/74357049没看完
+--------------------------------------------------------------2019.10.28
 }

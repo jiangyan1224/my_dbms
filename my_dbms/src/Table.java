@@ -1,7 +1,4 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 
 public class Table {
@@ -99,7 +96,7 @@ public class Table {
             if (fieldMap.containsKey(key))
                 return "错误：存在重复添加的字段"+key;
         }
-        writeDict(fields,true);
+        writeDict(fields,true);//在字典文件中写入创建的字段信息
 
         fieldMap.putAll(fields);//把fields中所有映射复制到fieldMap中，键相同的fieldMap被覆盖
         return "success";
@@ -116,13 +113,75 @@ public class Table {
                 //PrintWriter的构造函数接受FileWriter作为参数。得到PrintWriter实例之后调用其println()方法即可写入字符串
                 //创建字符流
                 FileWriter fw=new FileWriter(dictFile,true);//往dictFile中写入数据，以追加方式
-                //封装字符流的过滤流
+                //字符打印流
                 PrintWriter pw=new PrintWriter(fw);
                 ) {
-
-
-        } catch (IOException e) {
+            for (Field field:fields.values()){
+                String name=field.getName();
+                String type=field.getType();
+                //如果是主键，id string *
+                if (field.isPrimaryKey()){
+                    pw.println(name+" "+type+" "+"*");
+                }else {//如果不是主键 id string ^
+                    pw.println(name+" "+type+" "+"^");
+                }
+            }//end of for
+        } catch (IOException e){//FileWriter，包含了FileNotFoundException
             e.printStackTrace();
         }
     }
+
+    /**
+     * 根据表名获取表
+     * @param name 表名
+     * @return 返回null或者Table对象
+     */
+    public static Table getTable(String name){
+        if (!existTable(name)) return null;
+
+        Table table=new Table(name);
+        //start of 写入fields
+        try(
+                //字符读入流
+                FileReader fr=new FileReader(table.dictFile);
+                BufferedReader br=new BufferedReader(fr);//提供缓冲，用以加速
+                ) {
+            String line=null;
+            //文件读到末尾是null
+            while (null!=(line=br.readLine())){
+                String[] fieldValues=line.split(" ");//用空格隔开
+                Field field=new Field();
+                field.setName(fieldValues[0]);
+                field.setName(fieldValues[1]);
+                //==表示两个变量指向同一个对象；覆盖/重写/override后的equals判断两个对象内容是否一致
+                if ("*".equals(fieldValues[2])) field.setPrimaryKey(true);
+                else field.setPrimaryKey(false);
+
+                //把field的name作为fieldMap的key
+                table.fieldMap.put(fieldValues[0],field);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }//end of 写入fields
+        //start of写入data
+        //listFiles()方法是返回某个目录下所有文件和目录的绝对路径，返回的是File数组，一个table可能有多个数据表
+        File[] dataFiles=new File(table.folder,"data").listFiles();
+        //目录为空，则该数组将为空。 如果此抽象路径名不表示目录，或返回I / O错误，则返回null 。
+        if (null!=dataFiles&&0!=dataFiles.length){//确保new File的确存在
+            for (int i=1;i<=dataFiles.length;i++){
+                File dataFile=new File(table.folder+"/data",i+".data");
+                table.dataFileSet.add(dataFile);
+            }
+        }//end of 写入data
+
+        //写入索引文件
+        if (table.indexFile.exists()) table.readInex();
+        return table;
+
+    }
+
+    public Map<String,Field> getFieldMap() {return fieldMap;}
+
+
 }
