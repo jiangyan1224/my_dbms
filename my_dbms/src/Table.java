@@ -294,11 +294,16 @@ public class Table {
             if ("[NULL]".equals(dataValue)) continue;
             switch (field.getType()){
                 case "int":
+                    //正则表达式：\\+转义为加号，-因为在正则中没有专门的意思，所以不用转义
+                    // |指或  ?指前面的东西出现零次或一次  \\d转义为整数  +前面的东西至少出现一次
+                    //^以此开始，不包括^  $以此结束，不包括$
                     if (!dataValue.matches("^(-|\\+)?\\d+$"))
                         return false;
                     break;
                 case "double":
-                    if (!dataValue.matches("^(-|\\+)?\\d*\\.?\\d+$"))
+                    //*前面的东西出现零次或多次
+                    if (!dataValue.matches("^([-+])?\\d*\\.?\\d+$"))  //源代码
+//                      if (!dataValue.matches("^(-|\\+)?[0-9]+\\.?[0-9]*"))不匹配“ .123 ”的情况
                         return false;
                     break;
                 case "varchar":
@@ -309,6 +314,54 @@ public class Table {
         }
         return true;
     }
+
+    /**
+     * 插入数据到最后一个数据文件
+     * 如果数据行数超过限定值，写入到下一个文件中
+     * @param srcData
+     * @return
+     */
+    public String insert(Map<String,String> srcData){
+        File lastFile=null;
+        int lineNum=0;
+        int fileNum=0;
+//        dataFileSet：LinkedHashSet<File> dataFileSet
+        for (File file:dataFileSet){
+            fileNum++;
+            lastFile=file;
+            //lineNum记录最后一个文件的文件行数
+            lineNum=fileLineNum(lastFile);
+        }
+        //如果没有数据文件，新建一个1.data
+        //table初始化的时候dataFileSet就已经给了一个空的LinkedHashSet<File>
+        //getTable里面，获取对应的data文件，用的listFiles()，
+        // 判断返回结果为null或者返回结果的长度为0（不是一个目录或者目录下没有东西）
+        if (null==lastFile||0==fileNum){
+            //folder指当前表的目录，如table1目录
+            lastFile=new File(folder+"/data",1+".data");
+            dataFileSet.add(lastFile);
+            lineNum=0;
+        }else if (lineNumConfine<=fileLineNum(lastFile)){
+            //如果最后一个文件行数大于行数限制，新建数据文件
+            lastFile=new File(folder+"/data",fileNum+1+".data");
+            dataFileSet.add(lastFile);
+            lineNum=0;
+        }
+
+        //添加索引
+        for (Map.Entry<String,Field> fieldEntry:fieldMap.entrySet()){
+            String dataName=fieldEntry.getKey();
+            String dataValue=srcData.get(dataName);
+            //如果发现此数据为空，不添加到索引树中
+            if (null==dataValue|| "[NULL]".equals(dataValue)){
+                continue;
+            }
+            String dataType=fieldEntry.getValue().getType();
+
+
+        }
+    }
+
 
 
 
