@@ -318,6 +318,8 @@ public class Table {
     /**
      * 插入数据到最后一个数据文件
      * 如果数据行数超过限定值，写入到下一个文件中
+     * 这个函数完成的就是当没有.data或者最后一个.data满了，就加一个.data文件，实质性的写入是通过调用insertData函数完成
+     * 还做了添加索引操作，调用了writeIndex()方法
      * @param srcData
      * @return
      */
@@ -358,8 +360,28 @@ public class Table {
             }
             String dataType=fieldEntry.getValue().getType();
 
-
+////////////////////////////////////////////////////////////////////////////
+// 这个函数的添加索引部分还没写完，正在看indexTree的定义-------------2019.11.7
         }
+    }
+    /**
+     * 计算文件函数fileLineNum
+     * @param file
+     * @return 行数
+     */
+    private int fileLineNum(File file){
+        int num=0;
+        try(
+                FileReader fr=new FileReader(file);
+                BufferedReader br=new BufferedReader(fr);
+                ) {
+            while (null!=br.readLine()){
+                num++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return num;
     }
 
 
