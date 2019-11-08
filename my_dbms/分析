@@ -33,4 +33,28 @@ checkType中的data使用时是怎么输入的，[null]是哪来的？fillStr吗
 输入data时，缺省置为NULL还是；另外处理？checkType的fillStr就是[NULL]吗？如果是，就没必要设这个形参？
 涉及到indexTree的使用，把fileLineNum函数写了，然后要开始转到indexTree类的编写
 ----------------------------------------------------------------2019.11.06
+
+fileLineNum写完，开始看IndexTree
+http://developer.51cto.com/art/201905/596334.htm  实现Serializable序列化接口的作用
+Index类完成，但是不知道里面的filePath和lineNum的含义
+----------------------------------------------------------------2019.11.07
+
+IndexKey的value和type属性，还不知道含义
+IndexKey里的equals的getClass方法：运行时类
+https://zhidao.baidu.com/question/559162496.html
+https://zhidao.baidu.com/question/578080508.html
+在运行IndexKey的compareTo方法应该要检查一下两个IndexKey的类型是否相同，因为这个函数只比较value大小，但有可能出现类型不同但是值相同的情况，比如123和"123"
+IndexKey的equals方法可以把类型判断出来
+有关hashCode的作用：https://blog.csdn.net/a745233700/article/details/83186808
+IndexKey类完成
+
+IndexKey很可能是因为要放到某个本身要求有序的集合中(如list)，才必须要实现compareTo方法
+
+list的有序性是指按照元素的添加顺序来存储，set的无序性是指存储位置的无序性(按照hash值来存)
+list set map之间的区别联系以及它们往下实现的子类之间的区别联系？？？？？？？？？？？？？？待解决
+set下的HashSet TreeSet LinkedHashSet的区别？？？？？？？？？？？？？？？？？？？？？？？？？？待解决
+Iterator作用和使用http://bbs.itheima.com/forum.php?mod=viewthread&tid=10386&mobile=1
+IndexNode完成，它和Index的关系见手机的图
+----------------------------------------------------------------2019.11.08
+
 }
