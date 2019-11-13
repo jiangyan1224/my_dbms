@@ -1,5 +1,7 @@
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class IndexTree implements Serializable {
@@ -21,7 +23,12 @@ public class IndexTree implements Serializable {
     public void setTreeMap(TreeMap<IndexKey,IndexNode> treeMap){
         this.treeMap=treeMap;
     }
+
     public List<IndexNode> find(Relationship relationship,IndexKey condition){
-        //////////////////////////////////////////////////2019.11.13
+        List<IndexNode> indexNodeList =new ArrayList<>();
+        Map<IndexKey,IndexNode> indexNodeMap =null;
+        switch (relationship) {
+            case LESS_THAN:///////////////////////////////////2019.11.13 先看relationship类的定义
+        }
     }
 }

@@ -350,7 +350,7 @@ public class Table {
             lineNum=0;
         }
 
-        //添加索引
+        //添加索引  String,field
         for (Map.Entry<String,Field> fieldEntry:fieldMap.entrySet()){
             String dataName=fieldEntry.getKey();
             String dataValue=srcData.get(dataName);
